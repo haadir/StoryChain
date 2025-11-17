@@ -3,39 +3,72 @@
 import { useState, useEffect } from 'react';
 import { initSocket, getSocket } from '../lib/socket';
 
+interface Player {
+  id: string;
+  name: string;
+  socketId: string;
+}
+
+interface Comic {
+  story: string;
+  panels: string[];
+  images: (string | null)[];
+}
+
+interface GameData {
+  round: number;
+  maxRounds: number;
+}
+
+interface NextRoundData extends GameData {
+  lastSentence: string;
+}
+
+interface SubmissionData {
+  playerId: string;
+  submissionsCount: number;
+  totalPlayers: number;
+}
+
+interface JoinResponse {
+  success: boolean;
+  roomCode?: string;
+  error?: string;
+}
+
 export default function Home() {
   const [gameState, setGameState] = useState('home'); // home, lobby, playing, waiting, results
   const [playerName, setPlayerName] = useState('');
   const [roomCode, setRoomCode] = useState('');
-  const [players, setPlayers] = useState([]);
-  const [currentRound, setCurrentRound] = useState(0);
-  const [maxRounds, setMaxRounds] = useState(3);
-  const [sentence, setSentence] = useState('');
-  const [lastSentence, setLastSentence] = useState('');
-  const [comics, setComics] = useState({});
-  const [error, setError] = useState('');
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [currentRound, setCurrentRound] = useState<number>(0);
+  const [maxRounds, setMaxRounds] = useState<number>(3);
+  const [sentence, setSentence] = useState<string>('');
+  const [lastSentence, setLastSentence] = useState<string>('');
+  const [comics, setComics] = useState<Record<string, Comic>>({});
+  const [error, setError] = useState<string>('');
 
   useEffect(() => {
     const socket = initSocket();
 
-    socket.on('players-updated', (updatedPlayers) => {
+    socket.on('players-updated', (updatedPlayers: Player[]) => {
       setPlayers(updatedPlayers);
     });
 
-    socket.on('game-started', ({ round, maxRounds }) => {
+    socket.on('game-started', ({ round, maxRounds }: GameData) => {
       setCurrentRound(round);
       setMaxRounds(maxRounds);
       setGameState('playing');
       setLastSentence('');
     });
 
-    socket.on('submission-received', ({ submissionsCount, totalPlayers }) => {
+    socket.on('submission-received', ({ submissionsCount, totalPlayers }: SubmissionData) => {
       if (submissionsCount < totalPlayers) {
         setGameState('waiting');
       }
     });
 
-    socket.on('next-round', ({ round, maxRounds, lastSentence }) => {
+    socket.on('next-round', ({ round, maxRounds, lastSentence }: NextRoundData) => {
       setCurrentRound(round);
       setMaxRounds(maxRounds);
       setLastSentence(lastSentence);
@@ -47,12 +80,12 @@ export default function Home() {
       setGameState('generating');
     });
 
-    socket.on('comics-ready', (comicsData) => {
+    socket.on('comics-ready', (comicsData: Record<string, Comic>) => {
       setComics(comicsData);
       setGameState('results');
     });
 
-    socket.on('error', (message) => {
+    socket.on('error', (message: string) => {
       setError(message);
     });
 
@@ -63,9 +96,9 @@ export default function Home() {
     if (!playerName.trim()) return;
     
     const socket = getSocket();
-    socket.emit('create-room', playerName, (response) => {
+    socket.emit('create-room', playerName, (response: JoinResponse) => {
       if (response.success) {
-        setRoomCode(response.roomCode);
+        setRoomCode(response.roomCode || '');
         setGameState('lobby');
         setError('');
       }
@@ -76,12 +109,12 @@ export default function Home() {
     if (!playerName.trim() || !roomCode.trim()) return;
     
     const socket = getSocket();
-    socket.emit('join-room', roomCode.toUpperCase(), playerName, (response) => {
+    socket.emit('join-room', roomCode.toUpperCase(), playerName, (response: JoinResponse) => {
       if (response.success) {
         setGameState('lobby');
         setError('');
       } else {
-        setError(response.error);
+        setError(response.error || 'Failed to join room');
       }
     });
   };
@@ -161,8 +194,8 @@ export default function Home() {
           <div className="mb-6">
             <h3 className="font-semibold mb-3 text-gray-700">Players ({players.length}):</h3>
             <div className="space-y-2">
-              {players.map((player, index) => (
-                <div key={player.id} className="bg-gray-100 rounded-lg p-2">
+              {players.map((player) => (
+                <div key={player.id} className="bg-gray-100 rounded-lg p-2 text-black">
                   {player.name}
                 </div>
               ))}
@@ -197,7 +230,7 @@ export default function Home() {
           {lastSentence && (
             <div className="bg-gray-100 rounded-lg p-4 mb-4">
               <p className="text-sm text-gray-600 mb-1">Continue this story:</p>
-              <p className="font-medium">{lastSentence}</p>
+              <p className="font-medium text-black">{lastSentence}</p>
             </div>
           )}
           
@@ -205,7 +238,7 @@ export default function Home() {
             placeholder={currentRound === 1 ? "Start your story..." : "Continue the story..."}
             value={sentence}
             onChange={(e) => setSentence(e.target.value)}
-            className="w-full p-3 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-green-500 resize-none h-32"
+            className="w-full p-3 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-green-500 resize-none h-32 text-black"
           />
           
           <button
@@ -255,7 +288,7 @@ export default function Home() {
               const player = players.find(p => p.id === playerId);
               return (
                 <div key={playerId} className="bg-white rounded-lg shadow-xl p-6">
-                  <h2 className="text-xl font-bold mb-4">{player?.name}'s Story</h2>
+                  <h2 className="text-xl font-bold mb-4 text-black">{player?.name}'s Story</h2>
                   
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     {comic.images?.map((imageUrl, index) => (
@@ -271,14 +304,14 @@ export default function Home() {
                             <span className="text-gray-500">Image failed to load</span>
                           </div>
                         )}
-                        <p className="text-sm mt-2 text-gray-600">{comic.panels[index]}</p>
+                        <p className="text-sm mt-2 text-black">{comic.panels[index]}</p>
                       </div>
                     ))}
                   </div>
                   
                   <div className="bg-gray-100 rounded p-4">
-                    <h3 className="font-semibold mb-2">Full Story:</h3>
-                    <p className="text-gray-700">{comic.story}</p>
+                    <h3 className="font-semibold mb-2 text-black">Full Story:</h3>
+                    <p className="text-black">{comic.story}</p>
                   </div>
                 </div>
               );
