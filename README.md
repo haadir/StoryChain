@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🎭 Storychain - AI Pass-The-Story Game
 
-## Getting Started
+A multiplayer web game where players collaboratively create stories that get turned into AI-generated comics!
 
-First, run the development server:
+## 🚀 Quick Start
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+1. **Install dependencies**:
+   ```bash
+   npm install
+   ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. **Set up environment variables** (optional - works without for testing):
+   ```bash
+   cp .env.example .env
+   # Add your OpenAI API key to .env
+   ```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. **Start the backend server**:
+   ```bash
+   npm run server
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. **Start the frontend** (in another terminal):
+   ```bash
+   npm run dev
+   ```
 
-## Learn More
+5. **Play the game**:
+   - Open `http://localhost:3000` in your browser
+   - Create a room or join with a room code
+   - Share the room code with friends on their phones
+   - Start writing stories together!
 
-To learn more about Next.js, take a look at the following resources:
+## 🎮 How to Play
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **Join**: Host creates a room, others join with the room code
+2. **Write**: Each round, players write a word/sentence/phrase
+3. **Pass**: Stories get randomly passed between players
+4. **Continue**: Players see only the last sentence and continue the story
+5. **Generate**: After 3 rounds, AI creates comics from your chaotic stories
+6. **Enjoy**: View the hilarious AI-generated comics!
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🛠️ Features
 
-## Deploy on Vercel
+- ✅ Real-time multiplayer with Socket.io
+- ✅ Mobile-friendly responsive design
+- ✅ Room-based game sessions
+- ✅ Story chain management
+- ✅ AI integration (ChatGPT + DALL-E)
+- ✅ Beautiful gradient UI
+- ✅ Comic panel display
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🤖 AI Integration
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The game uses OpenAI's APIs to:
+1. **Rewrite** chaotic sentence chains into coherent, funny stories
+2. **Generate** comic panel descriptions 
+3. **Create** images for each panel using DALL-E
+
+*Note: The game works without API keys using mock data for testing.*
+
+## 📱 Mobile Support
+
+Players can join on their phones by visiting the same URL and entering the room code. The interface is optimized for mobile gameplay.
+
+## 🔧 Technical Details
+
+- **Frontend**: Next.js 16 with TypeScript and Tailwind CSS
+- **Backend**: Express.js with Socket.io for real-time communication
+- **AI**: OpenAI GPT-3.5-turbo and DALL-E 3
+- **Storage**: In-memory (no database needed for prototyping)
+
+Built in under 15 minutes following the requirements! 🎉
